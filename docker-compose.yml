@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: acidentes_aereos_postgres
+    restart: unless-stopped
+    ports:
+      - "XXXX:XXXX"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-acidentes_aereos}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      TZ: ${TZ:-UTC}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

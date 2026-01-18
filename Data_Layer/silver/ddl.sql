@@ -1,67 +1,78 @@
-CREATE TABLE IF NOT EXISTS public.acidentes_silver (
-    -- Identificação da ocorrência
-    "Codigo da Ocorrencia" VARCHAR(50),
-    "Numero da Ficha" VARCHAR(50),
+CREATE SCHEMA IF NOT EXISTS silver;
+GRANT USAGE ON SCHEMA silver TO public;
+ALTER SCHEMA silver OWNER TO pg_database_owner;
+
+CREATE TABLE IF NOT EXISTS silver.acd (
+    -- Identificação da ocorrência (chave primária)
+    cod_ocr VARCHAR(50) PRIMARY KEY,
+    num_fic VARCHAR(50),
     
     -- Informações temporais
-    "Data e Hora da Ocorrencia" TIMESTAMP,
-    "Ano" INTEGER,
-    "Mes" INTEGER,
-    "Dia" INTEGER,
-    "Hora" INTEGER,
+    dta_ocr TIMESTAMP NOT NULL,
+    ano INTEGER,
+    mes INTEGER,
+    dia INTEGER,
+    hor INTEGER,
     
     -- Localização
-    "UF da Ocorrencia" VARCHAR(2),
-    "Municipio da Ocorrencia" VARCHAR(255),
-    "Regiao da Ocorrencia" VARCHAR(100),
-    "Latitude" VARCHAR(50),
-    "Longitude" VARCHAR(50),
+    uf VARCHAR(2),
+    mun VARCHAR(255),
+    reg VARCHAR(100),
+    lat DOUBLE PRECISION,
+    lon DOUBLE PRECISION,
     
-    -- Classificação e tipo
-    "Classificacao da Ocorrencia" VARCHAR(100),
-    "Tipo de Ocorrencia" VARCHAR(255),
-    "Tipo de Operacao da Aeronave" VARCHAR(255),
-    "Fase de Operacao da Aeronave" VARCHAR(255),
+    -- Classificação e tipo de ocorrência
+    cls_ocr VARCHAR(100),
+    tpo_ocr VARCHAR(255),
+    tpo_ope VARCHAR(255),
+    fse_ope VARCHAR(255),
     
-    -- Aeronave
-    "Tipo de Aeronave" VARCHAR(255),
-    "Fabricante da Aeronave" VARCHAR(255),
-    "Modelo da Aeronave" VARCHAR(255),
-    "Matricula da Aeronave" VARCHAR(50),
-    "Numero de Serie da Aeronave" VARCHAR(100),
-    "Ano de Fabricacao da Aeronave" INTEGER,
-    "Quantidade de Assentos na Aeronave" INTEGER,
+    -- Dados da aeronave
+    tpo_aer VARCHAR(255),
+    fab_aer VARCHAR(255),
+    mdl_aer VARCHAR(255),
+    mat_aer VARCHAR(50),
+    sre_aer VARCHAR(100),
+    ano_fab_aer INTEGER,
+    qtd_ase_aer INTEGER,
     
     -- Danos e fatalidades
-    "Nivel de Dano da Aeronave" VARCHAR(100),
-    "Total de Fatalidades no Acidente" INTEGER NOT NULL DEFAULT 0,
-    "Total de Aeronaves Envolvidas" INTEGER NOT NULL DEFAULT 0,
+    nvl_dno VARCHAR(100),
+    ttl_fat INTEGER NOT NULL DEFAULT 0,
+    ttl_aer_env INTEGER NOT NULL DEFAULT 0,
     
     -- Investigação
-    "Total de Recomendacoes" INTEGER NOT NULL DEFAULT 0,
-    "Status da Investigacao" VARCHAR(100),
-    "Relatorio Publicado" VARCHAR(10),
+    ttl_rec INTEGER NOT NULL DEFAULT 0,
+    sts_inv VARCHAR(100),
+    rlt_pub VARCHAR(10),
     
     -- Indicadores calculados
-    "Nivel_Severidade" VARCHAR(20),
+    nvl_sev VARCHAR(20),
     
     -- Outras informações
-    "Pais da Ocorrencia" VARCHAR(100),
-    "Horario de Salida" VARCHAR(50),
-    "Horario de Chegada" VARCHAR(50),
-    "Rota" VARCHAR(255),
-    "Operador Padronizado" VARCHAR(255),
-    "Historico da Aeronave" TEXT
+    pais_ocr VARCHAR(100),
+    hor_sda VARCHAR(50),
+    hor_chg VARCHAR(50),
+    rta VARCHAR(255),
+    ope_pdr VARCHAR(255),
+    hst_aer TEXT
 );
 
 -- Índices para melhorar performance de consultas
-CREATE INDEX IF NOT EXISTS idx_acidentes_ano ON public.acidentes_silver("Ano");
-CREATE INDEX IF NOT EXISTS idx_acidentes_uf ON public.acidentes_silver("UF da Ocorrencia");
-CREATE INDEX IF NOT EXISTS idx_acidentes_tipo ON public.acidentes_silver("Tipo de Ocorrencia");
-CREATE INDEX IF NOT EXISTS idx_acidentes_severidade ON public.acidentes_silver("Nivel_Severidade");
-CREATE INDEX IF NOT EXISTS idx_acidentes_data ON public.acidentes_silver("Data e Hora da Ocorrencia");
-CREATE INDEX IF NOT EXISTS idx_acidentes_classificacao ON public.acidentes_silver("Classificacao da Ocorrencia");
+CREATE INDEX IF NOT EXISTS idx_acd_ano ON silver.acd(ano);
+CREATE INDEX IF NOT EXISTS idx_acd_uf ON silver.acd(uf);
+CREATE INDEX IF NOT EXISTS idx_acd_tpo_ocr ON silver.acd(tpo_ocr);
+CREATE INDEX IF NOT EXISTS idx_acd_nvl_sev ON silver.acd(nvl_sev);
+CREATE INDEX IF NOT EXISTS idx_acd_dta_ocr ON silver.acd(dta_ocr);
+CREATE INDEX IF NOT EXISTS idx_acd_cls_ocr ON silver.acd(cls_ocr);
+CREATE INDEX IF NOT EXISTS idx_acd_fse_ope ON silver.acd(fse_ope);
 
 -- Comentários na tabela
-COMMENT ON TABLE public.acidentes_silver IS 'Tabela da camada SILVER contendo dados tratados de acidentes aeronáuticos no Brasil';
-COMMENT ON COLUMN public.acidentes_silver."Nivel_Severidade" IS 'Indicador calculado: CRÍTICO (>50 fatalidades), GRAVE (>10), MODERADO (>0), LEVE (0)';
+COMMENT ON TABLE silver.acd IS 'Tabela da camada SILVER (One Big Table) contendo dados tratados de acidentes aeronáuticos no Brasil. Derivada do processamento ETL de acidentes_brutos.';
+COMMENT ON COLUMN silver.acd.cod_ocr IS 'Código único identificador da ocorrência aeronáutica';
+COMMENT ON COLUMN silver.acd.dta_ocr IS 'Data e hora da ocorrência no formato TIMESTAMP';
+COMMENT ON COLUMN silver.acd.ano IS 'Ano extraído de dta_ocr para facilitar filtros';
+COMMENT ON COLUMN silver.acd.uf IS 'Unidade Federativa da ocorrência (sigla de 2 caracteres)';
+COMMENT ON COLUMN silver.acd.ttl_fat IS 'Total de fatalidades registradas no acidente (0 = sem vítimas)';
+COMMENT ON COLUMN silver.acd.nvl_sev IS 'Indicador calculado de severidade: CRÍTICO (>50 fatalidades), GRAVE (11-50), MODERADO (1-10), LEVE (0)';
+COMMENT ON COLUMN silver.acd.ttl_rec IS 'Quantidade de recomendações geradas pela investigação';
