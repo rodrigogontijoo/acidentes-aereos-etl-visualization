@@ -1,17 +1,70 @@
+version: '3.8'
+
 services:
-  postgres:
+  # --- 1. BANCO DE DADOS (POSTGRES) ---
+  db:
     image: postgres:15-alpine
-    container_name: acidentes_aereos_postgres
-    restart: unless-stopped
+    container_name: acidentes_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: acidentes_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
     ports:
       - "5432:5432"
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-acidentes_aereos}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      TZ: ${TZ:-UTC}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      # Script inicial (opcional, se quiser que ele crie a tabela ao nascer)
+      - ./Data_Layer/silver/ddl.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # --- 2. PGADMIN (INTERFACE DO BANCO) ---
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: acidentes_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+
+  # --- 3. SEU AMBIENTE DE DADOS (JUPYTER LAB + SPARK) ---
+  jupyter-lab:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: acidentes_jupyter
+    ports:
+      - "8888:8888"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Variáveis para conexão
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: acidentes_db
+      DB_USER: postgres
+      DB_PASS: admin
+      # Permite root se precisar instalar algo na hora
+      GRANT_SUDO: "yes"
+    volumes:
+      # --- MAPEAMENTO (Windows/Linux -> Docker) ---
+      # Mapeia a pasta Data_Layer (conforme sua imagem)
+      - ./Data_Layer:/home/jovyan/work/Data_Layer
+      # Mapeia a pasta Transformer
+      - ./Transformer:/home/jovyan/work/Transformer
+      # (Opcional) Mapeia requirements se quiser editar de fora
+      - ./requirements.txt:/home/jovyan/work/requirements.txt
+    # Inicia sem pedir token/senha
+    command: start-notebook.sh --NotebookApp.token='' --NotebookApp.password=''
 
 volumes:
   postgres_data:

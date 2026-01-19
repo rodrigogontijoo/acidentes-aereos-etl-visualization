@@ -1,8 +1,5 @@
-CREATE SCHEMA IF NOT EXISTS silver;
-GRANT USAGE ON SCHEMA silver TO public;
-ALTER SCHEMA silver OWNER TO pg_database_owner;
-
-CREATE TABLE IF NOT EXISTS silver.acd (
+-- Criação da tabela no schema PUBLIC
+CREATE TABLE IF NOT EXISTS public.acd (
     -- Identificação da ocorrência (chave primária)
     cod_ocr VARCHAR(50) PRIMARY KEY,
     num_fic VARCHAR(50),
@@ -58,21 +55,21 @@ CREATE TABLE IF NOT EXISTS silver.acd (
     hst_aer TEXT
 );
 
--- Índices para melhorar performance de consultas
-CREATE INDEX IF NOT EXISTS idx_acd_ano ON silver.acd(ano);
-CREATE INDEX IF NOT EXISTS idx_acd_uf ON silver.acd(uf);
-CREATE INDEX IF NOT EXISTS idx_acd_tpo_ocr ON silver.acd(tpo_ocr);
-CREATE INDEX IF NOT EXISTS idx_acd_nvl_sev ON silver.acd(nvl_sev);
-CREATE INDEX IF NOT EXISTS idx_acd_dta_ocr ON silver.acd(dta_ocr);
-CREATE INDEX IF NOT EXISTS idx_acd_cls_ocr ON silver.acd(cls_ocr);
-CREATE INDEX IF NOT EXISTS idx_acd_fse_ope ON silver.acd(fse_ope);
+-- Índices para melhorar performance de consultas (Apontando para public.acd)
+CREATE INDEX IF NOT EXISTS idx_acd_ano ON public.acd(ano);
+CREATE INDEX IF NOT EXISTS idx_acd_uf ON public.acd(uf);
+CREATE INDEX IF NOT EXISTS idx_acd_tpo_ocr ON public.acd(tpo_ocr);
+CREATE INDEX IF NOT EXISTS idx_acd_nvl_sev ON public.acd(nvl_sev);
+CREATE INDEX IF NOT EXISTS idx_acd_dta_ocr ON public.acd(dta_ocr);
+CREATE INDEX IF NOT EXISTS idx_acd_cls_ocr ON public.acd(cls_ocr);
+CREATE INDEX IF NOT EXISTS idx_acd_fse_ope ON public.acd(fse_ope);
 
--- Comentários na tabela
-COMMENT ON TABLE silver.acd IS 'Tabela da camada SILVER (One Big Table) contendo dados tratados de acidentes aeronáuticos no Brasil. Derivada do processamento ETL de acidentes_brutos.';
-COMMENT ON COLUMN silver.acd.cod_ocr IS 'Código único identificador da ocorrência aeronáutica';
-COMMENT ON COLUMN silver.acd.dta_ocr IS 'Data e hora da ocorrência no formato TIMESTAMP';
-COMMENT ON COLUMN silver.acd.ano IS 'Ano extraído de dta_ocr para facilitar filtros';
-COMMENT ON COLUMN silver.acd.uf IS 'Unidade Federativa da ocorrência (sigla de 2 caracteres)';
-COMMENT ON COLUMN silver.acd.ttl_fat IS 'Total de fatalidades registradas no acidente (0 = sem vítimas)';
-COMMENT ON COLUMN silver.acd.nvl_sev IS 'Indicador calculado de severidade: CRÍTICO (>50 fatalidades), GRAVE (11-50), MODERADO (1-10), LEVE (0)';
-COMMENT ON COLUMN silver.acd.ttl_rec IS 'Quantidade de recomendações geradas pela investigação';
+-- Comentários na tabela (Apontando para public.acd)
+COMMENT ON TABLE public.acd IS 'Tabela consolidada (One Big Table) contendo dados tratados de acidentes aeronáuticos no Brasil. Armazenada no schema PUBLIC.';
+COMMENT ON COLUMN public.acd.cod_ocr IS 'Código único identificador da ocorrência aeronáutica';
+COMMENT ON COLUMN public.acd.dta_ocr IS 'Data e hora da ocorrência no formato TIMESTAMP';
+COMMENT ON COLUMN public.acd.ano IS 'Ano extraído de dta_ocr para facilitar filtros';
+COMMENT ON COLUMN public.acd.uf IS 'Unidade Federativa da ocorrência (sigla de 2 caracteres)';
+COMMENT ON COLUMN public.acd.ttl_fat IS 'Total de fatalidades registradas no acidente (0 = sem vítimas)';
+COMMENT ON COLUMN public.acd.nvl_sev IS 'Indicador calculado de severidade: CRÍTICO (>50 fatalidades), GRAVE (11-50), MODERADO (1-10), LEVE (0)';
+COMMENT ON COLUMN public.acd.ttl_rec IS 'Quantidade de recomendações geradas pela investigação';
