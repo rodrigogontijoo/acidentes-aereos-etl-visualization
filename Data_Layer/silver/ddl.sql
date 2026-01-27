@@ -1,5 +1,5 @@
--- Criação da tabela no schema PUBLIC
-CREATE TABLE IF NOT EXISTS public.acd (
+-- Criação da tabela no schema SILVER
+CREATE TABLE IF NOT EXISTS silver (
     -- Identificação da ocorrência (chave primária)
     cod_ocr VARCHAR(50) PRIMARY KEY,
     num_fic VARCHAR(50),
