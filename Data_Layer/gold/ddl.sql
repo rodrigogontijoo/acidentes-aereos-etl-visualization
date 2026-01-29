@@ -1,5 +1,3 @@
--- ARQUIVO: Data_Layer/gold/ddl.sql
-
 CREATE SCHEMA IF NOT EXISTS "DW";
 
 -- Limpeza (Ordem reversa para não quebrar chaves estrangeiras)
@@ -23,7 +21,7 @@ CREATE TABLE "DW".dim_aer (
 CREATE TABLE "DW".dim_loc (
     srk_loc     SERIAL PRIMARY KEY,
     nom_mun     VARCHAR(255),
-    sgl_uf      VARCHAR(20),      -- Aumentado para suportar 'NÃO INFORMADO'
+    sgl_uf      VARCHAR(20),      
     num_lat     DOUBLE PRECISION,
     num_lon     DOUBLE PRECISION,
     UNIQUE (nom_mun, sgl_uf, num_lat, num_lon)

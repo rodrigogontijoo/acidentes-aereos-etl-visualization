@@ -1,12 +1,8 @@
--- =============================================================================
--- CONSULTAS ANALÍTICAS AVANÇADAS (DATA WAREHOUSE - ACIDENTES AÉREOS)
--- Descrição: 10 Queries estratégicas para análise de segurança aeronáutica
--- =============================================================================
-
 -- -----------------------------------------------------------------------------
 -- 1. TENDÊNCIA ANUAL DE SEGURANÇA
--- Pergunta: O número de acidentes e mortes está aumentando ou diminuindo?
+-- O número de acidentes e mortes está aumentando ou diminuindo?
 -- -----------------------------------------------------------------------------
+
 SELECT 
     t.num_ano AS "Ano",
     COUNT(DISTINCT f.srk_ocr) AS "Total Ocorrências",
@@ -22,8 +18,9 @@ ORDER BY t.num_ano DESC;
 
 -- -----------------------------------------------------------------------------
 -- 2. SAZONALIDADE: OS MESES MAIS PERIGOSOS
--- Pergunta: Existe algum mês do ano com maior incidência histórica de acidentes?
+-- Existe algum mês do ano com maior incidência histórica de acidentes?
 -- -----------------------------------------------------------------------------
+
 SELECT 
     CASE t.num_mes
         WHEN 1 THEN 'Janeiro' WHEN 2 THEN 'Fevereiro' WHEN 3 THEN 'Março'
@@ -39,8 +36,9 @@ ORDER BY "Frequência Histórica" DESC;
 
 -- -----------------------------------------------------------------------------
 -- 3. RANKING DE RISCO POR ESTADO (UF)
--- Pergunta: Quais estados concentram o maior número de ocorrências graves?
+-- Quais estados concentram o maior número de ocorrências graves?
 -- -----------------------------------------------------------------------------
+
 SELECT 
     l.sgl_uf AS "UF",
     COUNT(CASE WHEN o.des_cls = 'ACIDENTE' THEN 1 END) AS "Qtd Acidentes",
@@ -56,8 +54,9 @@ LIMIT 10;
 
 -- -----------------------------------------------------------------------------
 -- 4. TOP 10 MUNICÍPIOS CRÍTICOS
--- Pergunta: Quais cidades específicas exigem atenção das autoridades?
+-- Quais cidades específicas exigem atenção das autoridades?
 -- -----------------------------------------------------------------------------
+
 SELECT 
     l.nom_mun || ' - ' || l.sgl_uf AS "Município",
     COUNT(*) AS "Total Ocorrências",
@@ -70,8 +69,9 @@ LIMIT 10;
 
 -- -----------------------------------------------------------------------------
 -- 5. COMPARATIVO: AVIÃO vs HELICÓPTERO vs OUTROS
--- Pergunta: Qual tipo de aeronave se envolve em acidentes mais letais?
+-- Qual tipo de aeronave se envolve em acidentes mais letais?
 -- -----------------------------------------------------------------------------
+
 SELECT 
     a.des_tpo AS "Tipo Aeronave",
     COUNT(*) AS "Quantidade Eventos",
@@ -85,8 +85,9 @@ ORDER BY "Índice Letalidade" DESC;
 
 -- -----------------------------------------------------------------------------
 -- 6. FABRICANTES COM MAIS OCORRÊNCIAS (DRILL-DOWN)
--- Pergunta: Quais as marcas de aeronaves mais frequentes nos relatórios?
+-- Quais as marcas de aeronaves mais frequentes nos relatórios?
 -- -----------------------------------------------------------------------------
+
 SELECT 
     a.nom_fab AS "Fabricante",
     COUNT(*) AS "Ocorrências",
@@ -100,8 +101,9 @@ LIMIT 10;
 
 -- -----------------------------------------------------------------------------
 -- 7. PARETO DE CAUSAS (TIPOS DE OCORRÊNCIA)
--- Pergunta: Quais são os problemas raiz que causam 80% dos acidentes?
+-- Quais são os problemas raiz que causam 80% dos acidentes?
 -- -----------------------------------------------------------------------------
+
 WITH Causas AS (
     SELECT 
         o.des_tpo AS tipo,
@@ -120,8 +122,9 @@ LIMIT 15;
 
 -- -----------------------------------------------------------------------------
 -- 8. MATRIZ DE RISCO: FASE DO VOO vs DANOS
--- Pergunta: Em que momento do voo a aeronave sofre danos mais severos?
+-- Em que momento do voo a aeronave sofre danos mais severos?
 -- -----------------------------------------------------------------------------
+
 SELECT 
     o.des_fse AS "Fase de Operação",
     SUM(CASE WHEN o.des_dno = 'DESTRUÍDA' THEN 1 ELSE 0 END) AS "Aeronaves Destruídas",
@@ -135,8 +138,9 @@ ORDER BY "Aeronaves Destruídas" DESC;
 
 -- -----------------------------------------------------------------------------
 -- 9. EFICIÊNCIA DAS INVESTIGAÇÕES (Recomendações de Segurança)
--- Pergunta: Acidentes mais graves geram mais aprendizado (recomendações)?
+-- Acidentes mais graves geram mais aprendizado (recomendações)?
 -- -----------------------------------------------------------------------------
+
 SELECT 
     o.des_sev AS "Severidade da Ocorrência",
     COUNT(*) AS "Qtd Eventos",
@@ -149,8 +153,9 @@ ORDER BY "Média Rec. por Evento" DESC;
 
 ------------------------------------------------------------
 -- 10. VARIAÇÃO ANO A ANO (YoY) - CRESCIMENTO OU QUEDA?
--- Pergunta: Qual o percentual de aumento ou diminuição de casos vs ano anterior?
+-- Qual o percentual de aumento ou diminuição de casos vs ano anterior?
 -- -----------------------------------------------------------------------------
+
 WITH MetricasAnuais AS (
     -- CTE: Prepara os dados agrupados por ano
     SELECT 
