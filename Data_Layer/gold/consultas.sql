@@ -15,8 +15,8 @@ SELECT
         WHEN COUNT(DISTINCT f.srk_ocr) = 0 THEN 0
         ELSE ROUND(SUM(f.num_fat)::numeric / COUNT(DISTINCT f.srk_ocr), 2) 
     END AS "Média Mortes/Evento"
-FROM gold.fat_ocr f
-JOIN gold.dim_tmp t ON f.srk_tmp = t.srk_tmp
+FROM "DW".fat_ocr f
+JOIN "DW".dim_tmp t ON f.srk_tmp = t.srk_tmp
 GROUP BY t.num_ano
 ORDER BY t.num_ano DESC;
 
@@ -32,8 +32,8 @@ SELECT
         WHEN 10 THEN 'Outubro' WHEN 11 THEN 'Novembro' WHEN 12 THEN 'Dezembro'
     END AS "Mês",
     COUNT(*) AS "Frequência Histórica"
-FROM gold.fat_ocr f
-JOIN gold.dim_tmp t ON f.srk_tmp = t.srk_tmp
+FROM "DW".fat_ocr f
+JOIN "DW".dim_tmp t ON f.srk_tmp = t.srk_tmp
 GROUP BY t.num_mes
 ORDER BY "Frequência Histórica" DESC;
 
@@ -46,9 +46,9 @@ SELECT
     COUNT(CASE WHEN o.des_cls = 'ACIDENTE' THEN 1 END) AS "Qtd Acidentes",
     COUNT(CASE WHEN o.des_cls = 'INCIDENTE' THEN 1 END) AS "Qtd Incidentes",
     SUM(f.num_fat) AS "Total Vidas Perdidas"
-FROM gold.fat_ocr f
-JOIN gold.dim_loc l ON f.srk_loc = l.srk_loc
-JOIN gold.dim_ocr o ON f.srk_ocr = o.srk_ocr
+FROM "DW".fat_ocr f
+JOIN "DW".dim_loc l ON f.srk_loc = l.srk_loc
+JOIN "DW".dim_ocr o ON f.srk_ocr = o.srk_ocr
 WHERE l.sgl_uf <> 'NÃO INFORMADO'
 GROUP BY l.sgl_uf
 ORDER BY "Qtd Acidentes" DESC
@@ -62,8 +62,8 @@ SELECT
     l.nom_mun || ' - ' || l.sgl_uf AS "Município",
     COUNT(*) AS "Total Ocorrências",
     SUM(f.num_fat) AS "Total Fatalidades"
-FROM gold.fat_ocr f
-JOIN gold.dim_loc l ON f.srk_loc = l.srk_loc
+FROM "DW".fat_ocr f
+JOIN "DW".dim_loc l ON f.srk_loc = l.srk_loc
 GROUP BY l.nom_mun, l.sgl_uf
 ORDER BY "Total Ocorrências" DESC
 LIMIT 10;
@@ -77,8 +77,8 @@ SELECT
     COUNT(*) AS "Quantidade Eventos",
     SUM(f.num_fat) AS "Total Mortes",
     ROUND((SUM(f.num_fat)::numeric / NULLIF(COUNT(*), 0)), 2) AS "Índice Letalidade"
-FROM gold.fat_ocr f
-JOIN gold.dim_aer a ON f.srk_aer = a.srk_aer
+FROM "DW".fat_ocr f
+JOIN "DW".dim_aer a ON f.srk_aer = a.srk_aer
 WHERE a.des_tpo IN ('AVIÃO', 'HELICÓPTERO', 'ULTRALEVE')
 GROUP BY a.des_tpo
 ORDER BY "Índice Letalidade" DESC;
@@ -91,8 +91,8 @@ SELECT
     a.nom_fab AS "Fabricante",
     COUNT(*) AS "Ocorrências",
     COUNT(DISTINCT a.nom_mdl) AS "Modelos Diferentes Envolvidos"
-FROM gold.fat_ocr f
-JOIN gold.dim_aer a ON f.srk_aer = a.srk_aer
+FROM "DW".fat_ocr f
+JOIN "DW".dim_aer a ON f.srk_aer = a.srk_aer
 WHERE a.nom_fab <> 'NÃO INFORMADO'
 GROUP BY a.nom_fab
 ORDER BY "Ocorrências" DESC
@@ -106,14 +106,14 @@ WITH Causas AS (
     SELECT 
         o.des_tpo AS tipo,
         COUNT(*) AS total
-    FROM gold.fat_ocr f
-    JOIN gold.dim_ocr o ON f.srk_ocr = o.srk_ocr
+    FROM "DW".fat_ocr f
+    JOIN "DW".dim_ocr o ON f.srk_ocr = o.srk_ocr
     GROUP BY o.des_tpo
 )
 SELECT 
     tipo AS "Causa Principal",
     total AS "Frequência",
-    ROUND((total::numeric / (SELECT COUNT(*) FROM gold.fat_ocr) * 100), 2) AS "% do Total"
+    ROUND((total::numeric / (SELECT COUNT(*) FROM "DW".fat_ocr) * 100), 2) AS "% do Total"
 FROM Causas
 ORDER BY total DESC
 LIMIT 15;
@@ -127,8 +127,8 @@ SELECT
     SUM(CASE WHEN o.des_dno = 'DESTRUÍDA' THEN 1 ELSE 0 END) AS "Aeronaves Destruídas",
     SUM(CASE WHEN o.des_dno = 'SUBSTANCIAL' THEN 1 ELSE 0 END) AS "Danos Substanciais",
     SUM(CASE WHEN o.des_dno = 'LEVE' THEN 1 ELSE 0 END) AS "Danos Leves"
-FROM gold.fat_ocr f
-JOIN gold.dim_ocr o ON f.srk_ocr = o.srk_ocr
+FROM "DW".fat_ocr f
+JOIN "DW".dim_ocr o ON f.srk_ocr = o.srk_ocr
 WHERE o.des_fse NOT IN ('NÃO INFORMADO', 'INDETERMINADA')
 GROUP BY o.des_fse
 ORDER BY "Aeronaves Destruídas" DESC;
@@ -142,8 +142,8 @@ SELECT
     COUNT(*) AS "Qtd Eventos",
     SUM(f.num_rec) AS "Total Recomendações Emitidas",
     ROUND(AVG(f.num_rec), 1) AS "Média Rec. por Evento"
-FROM gold.fat_ocr f
-JOIN gold.dim_ocr o ON f.srk_ocr = o.srk_ocr
+FROM "DW".fat_ocr f
+JOIN "DW".dim_ocr o ON f.srk_ocr = o.srk_ocr
 GROUP BY o.des_sev
 ORDER BY "Média Rec. por Evento" DESC;
 
@@ -157,8 +157,8 @@ WITH MetricasAnuais AS (
         t.num_ano,
         COUNT(*) AS total_eventos,
         SUM(f.num_fat) AS total_fatalidades
-    FROM gold.fat_ocr f
-    JOIN gold.dim_tmp t ON f.srk_tmp = t.srk_tmp
+    FROM "DW".fat_ocr f
+    JOIN "DW".dim_tmp t ON f.srk_tmp = t.srk_tmp
     GROUP BY t.num_ano
 )
 SELECT 

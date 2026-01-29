@@ -1,7 +1,7 @@
 # 1. Resumo da Arquitetura (Acidentes Aéreos)
 
 ## 1.1. Camada Prata (Silver)
-* **Artefato Principal:** `public.acd` (One Big Table).
+* **Artefato Principal:** `silver.acd` (One Big Table).
 * **Foco:** Dados limpos, tipados e com coordenadas corrigidas, mantendo a granularidade original.
 
 ## 1.2. Camada Gold (Data Warehouse)
@@ -46,7 +46,7 @@
 
 ## 2.3. Glossário Detalhado por Tabela
 
-### 2.3.1 Dimensão Aeronave (`gold.dim_aer`)
+### 2.3.1 Dimensão Aeronave (`"DW".dim_aer`)
 | Mnemónico | Significado |
 | :--- | :--- |
 | **srk_aer** | Surrogate Key da Aeronave (PK) |
@@ -55,7 +55,7 @@
 | **nom_mdl** | Modelo da Aeronave (ex: 172) |
 | **des_tpo** | Tipo da Aeronave (ex: AVIÃO, HELICÓPTERO) |
 
-### 2.3.2 Dimensão Localização (`gold.dim_loc`)
+### 2.3.2 Dimensão Localização (`"DW".dim_loc`)
 | Mnemónico | Significado |
 | :--- | :--- |
 | **srk_loc** | Surrogate Key da Localização (PK) |
@@ -64,7 +64,7 @@
 | **num_lat** | Latitude geográfica tratada |
 | **num_lon** | Longitude geográfica tratada |
 
-### 2.3.3 Dimensão Tempo (`gold.dim_tmp`)
+### 2.3.3 Dimensão Tempo (`"DW".dim_tmp`)
 | Mnemónico | Significado |
 | :--- | :--- |
 | **srk_tmp** | Surrogate Key do Tempo (PK) |
@@ -72,7 +72,7 @@
 | **num_mes** | Mês da ocorrência (1-12) |
 | **num_dia** | Dia da ocorrência (1-31) |
 
-### 2.3.4 Dimensão Detalhes Ocorrência (`gold.dim_ocr`)
+### 2.3.4 Dimensão Detalhes Ocorrência (`"DW".dim_ocr`)
 | Mnemónico | Significado |
 | :--- | :--- |
 | **srk_ocr** | Surrogate Key da Ocorrência (PK) |
@@ -83,7 +83,7 @@
 | **des_sev** | Severidade Calculada (ex: CRÍTICA, LEVE - regra de negócio) |
 | **des_dno** | Nível de Dano na Aeronave (ex: SUBSTANCIAL, DESTRUÍDA) |
 
-### 2.3.5 Fato Ocorrências (`gold.fat_ocr`)
+### 2.3.5 Fato Ocorrências (`"DW".fat_ocr`)
 | Mnemónico | Significado |
 | :--- | :--- |
 | **srk_aer** | FK para Dimensão Aeronave |
